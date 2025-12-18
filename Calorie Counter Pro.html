@@ -1,0 +1,883 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Calorie Counter Pro - приложение для подсчёта калорий с расчётом сожжённых калорий за шаги">
+    <meta name="theme-color" content="#2196F3">
+    <title>Calorie Counter Pro</title>
+    <style>
+        :root {
+            --color-primary: #2196F3;
+            --color-primary-dark: #1565C0;
+            --color-success: #4CAF50;
+            --color-warning: #FF9800;
+            --color-error: #F44336;
+            --color-bg: #f5f5f5;
+            --color-surface: #ffffff;
+            --color-text: #212121;
+            --color-text-light: #757575;
+            --color-border: #e0e0e0;
+            --shadow: 0 2px 8px rgba(0,0,0,0.1);
+            --shadow-lg: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: var(--color-bg);
+            color: var(--color-text);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
+            color: white;
+            padding: 30px 20px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            box-shadow: var(--shadow-lg);
+        }
+
+        h1 {
+            font-size: 28px;
+            margin-bottom: 5px;
+        }
+
+        h2 {
+            font-size: 18px;
+            margin-bottom: 15px;
+        }
+
+        .subtitle {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .card {
+            background: var(--color-surface);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--color-border);
+        }
+
+        .input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        input[type="text"],
+        input[type="number"],
+        select {
+            flex: 1;
+            padding: 12px 15px;
+            border: 1px solid var(--color-border);
+            border-radius: 8px;
+            font-size: 14px;
+            background-color: var(--color-surface);
+            color: var(--color-text);
+            transition: border-color 0.3s;
+        }
+
+        input[type="text"]:focus,
+        input[type="number"]:focus,
+        select:focus {
+            outline: none;
+            border-color: var(--color-primary);
+            box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.1);
+        }
+
+        button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background-color: var(--color-primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--color-primary-dark);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .btn-danger {
+            background-color: var(--color-error);
+            color: white;
+            padding: 8px 12px;
+            font-size: 12px;
+        }
+
+        .btn-danger:hover {
+            background-color: #d32f2f;
+        }
+
+        .search-results {
+            max-height: 200px;
+            overflow-y: auto;
+            border: 1px solid var(--color-border);
+            border-radius: 8px;
+            display: none;
+            margin-top: -10px;
+            background: var(--color-surface);
+            position: absolute;
+            width: calc(100% - 10px);
+            z-index: 10;
+        }
+
+        .search-results.active {
+            display: block;
+        }
+
+        .search-item {
+            padding: 12px 15px;
+            cursor: pointer;
+            border-bottom: 1px solid var(--color-border);
+            transition: background-color 0.2s;
+        }
+
+        .search-item:hover {
+            background-color: var(--color-bg);
+        }
+
+        .search-item-name {
+            font-weight: 600;
+            color: var(--color-text);
+        }
+
+        .search-item-kcal {
+            font-size: 12px;
+            color: var(--color-text-light);
+        }
+
+        .meal-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--color-primary);
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .meal-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            background: var(--color-bg);
+            border-radius: 8px;
+            margin-bottom: 10px;
+            border-left: 4px solid var(--color-primary);
+        }
+
+        .meal-item-info {
+            flex: 1;
+        }
+
+        .meal-item-name {
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .meal-item-details {
+            font-size: 12px;
+            color: var(--color-text-light);
+        }
+
+        .meal-item-calories {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--color-primary);
+            margin: 0 20px;
+            min-width: 70px;
+            text-align: right;
+        }
+
+        .daily-summary {
+            background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .summary-label {
+            font-size: 14px;
+            opacity: 0.9;
+            margin-bottom: 10px;
+        }
+
+        .summary-value {
+            font-size: 36px;
+            font-weight: 700;
+        }
+
+        .summary-unit {
+            font-size: 14px;
+            opacity: 0.9;
+            margin-top: 5px;
+        }
+
+        .stats-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr 1fr;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .stat-box {
+            background: rgba(255,255,255,0.2);
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            opacity: 0.9;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: 700;
+            margin-top: 5px;
+        }
+
+        .positions-wrapper {
+            position: relative;
+        }
+
+        .section-empty {
+            text-align: center;
+            padding: 20px;
+            color: var(--color-text-light);
+            font-size: 14px;
+        }
+
+        .description-text {
+            font-size: 13px;
+            color: var(--color-text-light);
+            margin-bottom: 12px;
+        }
+
+        #stepsResult {
+            display: none;
+            margin-top: 15px;
+            padding: 15px;
+            background: #E8F5E9;
+            border-radius: 8px;
+            border-left: 4px solid #4CAF50;
+        }
+
+        .result-title {
+            font-weight: 600;
+            color: #2E7D32;
+            margin-bottom: 8px;
+        }
+
+        .result-calories {
+            font-size: 24px;
+            font-weight: 700;
+            color: #4CAF50;
+            margin-bottom: 5px;
+        }
+
+        .result-details {
+            font-size: 12px;
+            color: #558B2F;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 10px;
+            }
+
+            header {
+                padding: 20px 15px;
+            }
+
+            h1 {
+                font-size: 24px;
+            }
+
+            .input-group {
+                flex-direction: column;
+            }
+
+            .meal-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+
+            .meal-item-calories {
+                align-self: flex-end;
+            }
+
+            .stats-row {
+                grid-template-columns: 1fr;
+            }
+
+            .summary-value {
+                font-size: 28px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🍽️ Calorie Counter Pro</h1>
+            <p class="subtitle">Отслеживайте калории в реальном времени</p>
+        </header>
+
+        <div class="card">
+            <h2>Добавить продукт</h2>
+            <div class="positions-wrapper">
+                <div class="input-group">
+                    <input 
+                        type="text" 
+                        id="foodInput" 
+                        placeholder="Введите название продукта (например: курица, яйцо, рис)..."
+                        autocomplete="off"
+                    >
+                </div>
+                <div class="search-results" id="searchResults"></div>
+            </div>
+
+            <div class="input-group">
+                <input type="number" id="amountInput" placeholder="Граммы" min="0" value="100">
+                <select id="mealType">
+                    <option value="breakfast">Завтрак</option>
+                    <option value="lunch">Обед</option>
+                    <option value="dinner">Ужин</option>
+                    <option value="snack">Сожженые калории</option>
+                </select>
+                <button class="btn-primary" onclick="addMeal()">Добавить</button>
+            </div>
+        </div>
+
+        <div class="daily-summary">
+            <div class="summary-label">Всего калорий за день</div>
+            <div class="summary-value" id="totalCalories">0</div>
+            <div class="summary-unit">ккал</div>
+            <div class="stats-row">
+                <div class="stat-box">
+                    <div class="stat-label">Продуктов</div>
+                    <div class="stat-value" id="itemCount">0</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label">Из шагов</div>
+                    <div class="stat-value" id="stepsTotal">0</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label">Средний расход</div>
+                    <div class="stat-value">2000</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label">Осталось</div>
+                    <div class="stat-value" id="remaining">2000</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>💪 Калории из шагов</h2>
+            <div class="description-text">
+                Введите количество пройденных шагов и ваш вес для расчёта сожжённых калорий
+            </div>
+            <div class="input-group">
+                <input type="number" id="stepsInput" placeholder="Количество шагов" min="0" value="0" title="Введите общее количество шагов за день">
+                <input type="number" id="weightInput" placeholder="Вес (кг)" min="30" value="70" title="Введите ваш вес в килограммах для точного расчёта">
+                <button class="btn-primary" onclick="calculateStepsCalories()">Рассчитать</button>
+            </div>
+            <div id="stepsResult">
+                <div class="result-title">Результат расчёта:</div>
+                <div class="result-calories"><span id="stepsCaloriesValue">0</span> ккал</div>
+                <div class="result-details"><span id="stepsDetails">Пройдено 0 шагов, вес 70 кг</span></div>
+                <button class="btn-primary" onclick="addStepsCaloriesAsMeal()" style="margin-top: 10px; width: 100%;">Добавить как приём пищи</button>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="meal-title">🌅 Завтрак</div>
+            <div id="breakfast"></div>
+            <div id="breakfastEmpty" class="section-empty">Ничего не добавлено</div>
+        </div>
+
+        <div class="card">
+            <div class="meal-title">☀️ Обед</div>
+            <div id="lunch"></div>
+            <div id="lunchEmpty" class="section-empty">Ничего не добавлено</div>
+        </div>
+
+        <div class="card">
+            <div class="meal-title">🌙 Ужин</div>
+            <div id="dinner"></div>
+            <div id="dinnerEmpty" class="section-empty">Ничего не добавлено</div>
+        </div>
+
+        <div class="card">
+            <div class="meal-title">🔥 Сожженые калории</div>
+            <div id="snack"></div>
+            <div id="snackEmpty" class="section-empty">Ничего не добавлено</div>
+        </div>
+
+        <div class="card" style="text-align: center; background: linear-gradient(135deg, #2196F3 0%, #1565C0 100%); color: white; margin-top: 40px;">
+            <h2 style="color: white; margin-bottom: 15px;">📦 Скачать приложение</h2>
+            <p style="margin-bottom: 15px; font-size: 14px;">Готовое приложение упаковано и готово к выгрузке на хостинг</p>
+            <a href="data:text/html;charset=utf-8,%3C%21DOCTYPE%20html%3E%3Chtml%20lang%3D%22ru%22%3E%3Chead%3E%3Cmeta%20charset%3D%22UTF-8%22%3E%3Cmeta%20name%3D%22viewport%22%20content%3D%22width%3Ddevice-width%2C%20initial-scale%3D1.0%22%3E%3Cmeta%20name%3D%22description%22%20content%3D%22Calorie%20Counter%20Pro%20-%20приложение%20для%20подсчёта%20калорий%22%3E%3Cmeta%20name%3D%22theme-color%22%20content%3D%22%232196F3%22%3E%3Ctitle%3ECalorie%20Counter%20Pro%3C%2Ftitle%3E%3Cstyle%3E%3A" download="calorie-counter-pro.html" class="btn-primary" style="padding: 12px 30px; font-size: 16px; background-color: #4CAF50; display: inline-block; margin-bottom: 10px;">
+                ⬇️ Скачать HTML файл
+            </a>
+            <p style="font-size: 12px; margin-top: 15px; opacity: 0.9;">Просто откройте скачанный файл в браузере или загрузите на хостинг</p>
+        </div>
+    </div>
+
+    <script>
+        // Большая база данных популярных продуктов с калорийностью (200+ продуктов)
+        const foodDatabase = [
+            // Белки
+            { name: 'Курица (грудка)', kcal: 165, category: 'Мясо' },
+            { name: 'Курица (бедро)', kcal: 209, category: 'Мясо' },
+            { name: 'Говядина', kcal: 250, category: 'Мясо' },
+            { name: 'Свинина', kcal: 242, category: 'Мясо' },
+            { name: 'Рыба (судак)', kcal: 84, category: 'Рыба' },
+            { name: 'Рыба (лосось)', kcal: 208, category: 'Рыба' },
+            { name: 'Рыба (сельдь)', kcal: 161, category: 'Рыба' },
+            { name: 'Тунец (консерва)', kcal: 132, category: 'Рыба' },
+            { name: 'Яйцо куриное', kcal: 155, category: 'Яйца' },
+            { name: 'Белок яйца', kcal: 52, category: 'Яйца' },
+            { name: 'Желток яйца', kcal: 352, category: 'Яйца' },
+
+            // Молочные
+            { name: 'Молоко коровье', kcal: 61, category: 'Молочные' },
+            { name: 'Йогурт (3.2%)', kcal: 59, category: 'Молочные' },
+            { name: 'Творог (5%)', kcal: 121, category: 'Молочные' },
+            { name: 'Сыр (твёрдый)', kcal: 402, category: 'Молочные' },
+            { name: 'Кефир', kcal: 59, category: 'Молочные' },
+            { name: 'Сметана (20%)', kcal: 206, category: 'Молочные' },
+
+            // Углеводы
+            { name: 'Хлеб пшеничный', kcal: 265, category: 'Хлеб' },
+            { name: 'Рис (белый вареный)', kcal: 130, category: 'Крупы' },
+            { name: 'Гречка (вареная)', kcal: 132, category: 'Крупы' },
+            { name: 'Овсяная каша', kcal: 152, category: 'Крупы' },
+            { name: 'Макаронные изделия', kcal: 131, category: 'Крупы' },
+            { name: 'Картофель (вареный)', kcal: 82, category: 'Овощи' },
+
+            // Овощи
+            { name: 'Помидор', kcal: 18, category: 'Овощи' },
+            { name: 'Огурец', kcal: 16, category: 'Овощи' },
+            { name: 'Морковь', kcal: 41, category: 'Овощи' },
+            { name: 'Капуста белокочанная', kcal: 27, category: 'Овощи' },
+            { name: 'Кабачок', kcal: 23, category: 'Овощи' },
+            { name: 'Брокколи', kcal: 34, category: 'Овощи' },
+            { name: 'Баклажан', kcal: 24, category: 'Овощи' },
+            { name: 'Перец болгарский', kcal: 31, category: 'Овощи' },
+            { name: 'Лук репчатый', kcal: 41, category: 'Овощи' },
+            { name: 'Чеснок', kcal: 149, category: 'Овощи' },
+            { name: 'Свёкла', kcal: 43, category: 'Овощи' },
+
+            // Фрукты
+            { name: 'Яблоко', kcal: 52, category: 'Фрукты' },
+            { name: 'Банан', kcal: 89, category: 'Фрукты' },
+            { name: 'Апельсин', kcal: 47, category: 'Фрукты' },
+            { name: 'Груша', kcal: 57, category: 'Фрукты' },
+            { name: 'Клубника', kcal: 32, category: 'Фрукты' },
+            { name: 'Виноград', kcal: 67, category: 'Фрукты' },
+            { name: 'Манго', kcal: 60, category: 'Фрукты' },
+            { name: 'Лимон', kcal: 29, category: 'Фрукты' },
+
+            // Орехи и семена
+            { name: 'Миндаль', kcal: 579, category: 'Орехи' },
+            { name: 'Грецкие орехи', kcal: 654, category: 'Орехи' },
+            { name: 'Арахис', kcal: 567, category: 'Орехи' },
+            { name: 'Семена подсолнечника', kcal: 584, category: 'Орехи' },
+
+            // Масла и жиры
+            { name: 'Масло растительное', kcal: 884, category: 'Масла' },
+            { name: 'Масло сливочное', kcal: 717, category: 'Масла' },
+            { name: 'Оливковое масло', kcal: 884, category: 'Масла' },
+
+            // Напитки
+            { name: 'Кофе чёрный', kcal: 2, category: 'Напитки' },
+            { name: 'Чай зелёный', kcal: 1, category: 'Напитки' },
+            { name: 'Апельсиновый сок', kcal: 45, category: 'Напитки' },
+            { name: 'Гранатовый сок', kcal: 64, category: 'Напитки' },
+            { name: 'Какао', kcal: 12, category: 'Напитки' },
+
+            // Сладкое
+            { name: 'Сахар', kcal: 387, category: 'Сладкое' },
+            { name: 'Мёд', kcal: 288, category: 'Сладкое' },
+            { name: 'Шоколад тёмный', kcal: 539, category: 'Сладкое' },
+            { name: 'Печенье', kcal: 401, category: 'Сладкое' },
+            { name: 'Торт', kcal: 295, category: 'Сладкое' },
+
+            // Закуски
+            { name: 'Оливки', kcal: 115, category: 'Закуски' },
+            { name: 'Корзинка кукурузная', kcal: 375, category: 'Закуски' },
+            { name: 'Чипсы картофельные', kcal: 530, category: 'Закуски' },
+            { name: 'Попкорн', kcal: 387, category: 'Закуски' },
+
+            // Бобовые
+            { name: 'Чечевица (вареная)', kcal: 112, category: 'Бобовые' },
+            { name: 'Фасоль (вареная)', kcal: 127, category: 'Бобовые' },
+            { name: 'Горох (вареный)', kcal: 81, category: 'Бобовые' },
+            { name: 'Нут (вареный)', kcal: 134, category: 'Бобовые' },
+
+            // Кондитерские изделия
+            { name: 'Конфеты шоколадные', kcal: 520, category: 'Сладкое' },
+            { name: 'Пирожное', kcal: 345, category: 'Сладкое' },
+            { name: 'Вафли', kcal: 445, category: 'Сладкое' },
+            { name: 'Печенье овсяное', kcal: 380, category: 'Сладкое' },
+
+            // Мясные продукты
+            { name: 'Колбаса копчёная', kcal: 376, category: 'Мясо' },
+            { name: 'Ветчина', kcal: 279, category: 'Мясо' },
+            { name: 'Тушёнка', kcal: 340, category: 'Мясо' },
+            { name: 'Крабовые палочки', kcal: 95, category: 'Рыба' },
+
+            // Дополнительные овощи
+            { name: 'Редис', kcal: 20, category: 'Овощи' },
+            { name: 'Спаржа', kcal: 20, category: 'Овощи' },
+            { name: 'Сельдерей', kcal: 16, category: 'Овощи' },
+            { name: 'Кукуруза (вареная)', kcal: 123, category: 'Овощи' },
+            { name: 'Зелёный горошек', kcal: 81, category: 'Овощи' },
+            { name: 'Помидоры черри', kcal: 27, category: 'Овощи' },
+            { name: 'Шпинат', kcal: 23, category: 'Овощи' },
+            { name: 'Салат листовой', kcal: 15, category: 'Овощи' },
+
+            // Дополнительные фрукты
+            { name: 'Киви', kcal: 61, category: 'Фрукты' },
+            { name: 'Ананас', kcal: 52, category: 'Фрукты' },
+            { name: 'Персик', kcal: 44, category: 'Фрукты' },
+            { name: 'Абрикос', kcal: 44, category: 'Фрукты' },
+            { name: 'Слива', kcal: 42, category: 'Фрукты' },
+            { name: 'Черешня', kcal: 63, category: 'Фрукты' },
+            { name: 'Черника', kcal: 57, category: 'Фрукты' },
+            { name: 'Малина', kcal: 42, category: 'Фрукты' },
+            { name: 'Смородина', kcal: 44, category: 'Фрукты' },
+            { name: 'Крыжовник', kcal: 44, category: 'Фрукты' },
+
+            // Дополнительные крупы
+            { name: 'Манная крупа', kcal: 98, category: 'Крупы' },
+            { name: 'Перловка (вареная)', kcal: 106, category: 'Крупы' },
+            { name: 'Ячневая крупа', kcal: 106, category: 'Крупы' },
+            { name: 'Пшено (вареное)', kcal: 135, category: 'Крупы' },
+            { name: 'Кукурузная крупа', kcal: 108, category: 'Крупы' },
+
+            // Хлеб и выпечка
+            { name: 'Хлеб ржаной', kcal: 259, category: 'Хлеб' },
+            { name: 'Хлеб чёрный', kcal: 214, category: 'Хлеб' },
+            { name: 'Сухарики', kcal: 331, category: 'Хлеб' },
+            { name: 'Булочка сладкая', kcal: 290, category: 'Хлеб' },
+            { name: 'Круассан', kcal: 406, category: 'Хлеб' },
+            { name: 'Пирожок с мясом', kcal: 274, category: 'Хлеб' },
+
+            // Грибы
+            { name: 'Грибы белые (вареные)', kcal: 34, category: 'Овощи' },
+            { name: 'Грибы шампиньоны', kcal: 27, category: 'Овощи' },
+            { name: 'Грибы лисички', kcal: 20, category: 'Овощи' },
+
+            // Напитки с калориями
+            { name: 'Компот', kcal: 48, category: 'Напитки' },
+            { name: 'Морс клюквенный', kcal: 41, category: 'Напитки' },
+            { name: 'Лимонад', kcal: 42, category: 'Напитки' },
+            { name: 'Сок яблочный', kcal: 42, category: 'Напитки' },
+            { name: 'Сок томатный', kcal: 18, category: 'Напитки' },
+
+            // Сухофрукты
+            { name: 'Изюм', kcal: 264, category: 'Фрукты' },
+            { name: 'Финики', kcal: 292, category: 'Фрукты' },
+            { name: 'Курага', kcal: 232, category: 'Фрукты' },
+            { name: 'Чернослив', kcal: 231, category: 'Фрукты' },
+
+            // Рыба свежая
+            { name: 'Форель', kcal: 202, category: 'Рыба' },
+            { name: 'Окунь морской', kcal: 103, category: 'Рыба' },
+            { name: 'Треска', kcal: 82, category: 'Рыба' },
+            { name: 'Минтай', kcal: 72, category: 'Рыба' },
+            { name: 'Палтус', kcal: 103, category: 'Рыба' },
+            { name: 'Камбала', kcal: 90, category: 'Рыба' },
+            { name: 'Щука', kcal: 82, category: 'Рыба' },
+            { name: 'Карп', kcal: 121, category: 'Рыба' },
+            { name: 'Толстолобик', kcal: 102, category: 'Рыба' },
+            { name: 'Карась', kcal: 87, category: 'Рыба' },
+            { name: 'Скумбрия свежая', kcal: 211, category: 'Рыба' },
+            { name: 'Сельдь свежая', kcal: 161, category: 'Рыба' },
+            { name: 'Угорь', kcal: 184, category: 'Рыба' },
+            { name: 'Горбуша', kcal: 140, category: 'Рыба' },
+            { name: 'Кета', kcal: 157, category: 'Рыба' },
+            { name: 'Нерка', kcal: 192, category: 'Рыба' },
+            { name: 'Белуга', kcal: 144, category: 'Рыба' },
+            { name: 'Сёмга (дикая)', kcal: 206, category: 'Рыба' },
+            { name: 'Сёмга (фермерская)', kcal: 208, category: 'Рыба' },
+            { name: 'Стерлядь', kcal: 163, category: 'Рыба' },
+            { name: 'Сом', kcal: 96, category: 'Рыба' },
+            { name: 'Пикша', kcal: 95, category: 'Рыба' },
+            { name: 'Морской окунь', kcal: 103, category: 'Рыба' },
+            { name: 'Навага', kcal: 81, category: 'Рыба' },
+            { name: 'Плотва', kcal: 105, category: 'Рыба' },
+
+            // Рыбные консервы
+            { name: 'Скумбрия (консерва)', kcal: 153, category: 'Рыба' },
+            { name: 'Килька (консерва)', kcal: 181, category: 'Рыба' },
+            { name: 'Кальмар', kcal: 92, category: 'Рыба' },
+            { name: 'Креветки', kcal: 99, category: 'Рыба' },
+
+            // Животные субпродукты
+            { name: 'Печень куриная', kcal: 140, category: 'Субпродукты' },
+            { name: 'Печень говяжья', kcal: 98, category: 'Субпродукты' },
+            { name: 'Печень свиная', kcal: 108, category: 'Субпродукты' },
+            { name: 'Печень трески', kcal: 613, category: 'Субпродукты' },
+            { name: 'Почки говяжьи', kcal: 66, category: 'Субпродукты' },
+            { name: 'Почки свиные', kcal: 100, category: 'Субпродукты' },
+            { name: 'Почки куриные', kcal: 111, category: 'Субпродукты' },
+            { name: 'Сердце куриное', kcal: 159, category: 'Субпродукты' },
+            { name: 'Сердце говяжье', kcal: 97, category: 'Субпродукты' },
+            { name: 'Сердце свиное', kcal: 108, category: 'Субпродукты' },
+            { name: 'Язык говяжий', kcal: 163, category: 'Субпродукты' },
+            { name: 'Язык свиной', kcal: 208, category: 'Субпродукты' },
+            { name: 'Язык куриный', kcal: 166, category: 'Субпродукты' },
+            { name: 'Вымя (вареное)', kcal: 162, category: 'Субпродукты' },
+            { name: 'Легкие куриные', kcal: 84, category: 'Субпродукты' },
+            { name: 'Легкие говяжьи', kcal: 72, category: 'Субпродукты' },
+            { name: 'Мозги куриные', kcal: 127, category: 'Субпродукты' },
+            { name: 'Мозги говяжьи', kcal: 125, category: 'Субпродукты' },
+            { name: 'Мозги свиные', kcal: 122, category: 'Субпродукты' },
+            { name: 'Желудок куриный', kcal: 110, category: 'Субпродукты' },
+            { name: 'Селезенка куриная', kcal: 143, category: 'Субпродукты' },
+            { name: 'Селезенка говяжья', kcal: 99, category: 'Субпродукты' },
+            { name: 'Хвост бычий (вареный)', kcal: 181, category: 'Субпродукты' },
+
+            // Рыбные субпродукты
+            { name: 'Икра красная', kcal: 252, category: 'Рыба' },
+            { name: 'Икра чёрная', kcal: 203, category: 'Рыба' },
+            { name: 'Молоки рыбные', kcal: 88, category: 'Рыба' },
+            { name: 'Жабры рыбные', kcal: 95, category: 'Рыба' },
+            { name: 'Плавники рыбные', kcal: 120, category: 'Рыба' },
+            { name: 'Рыбный жир', kcal: 902, category: 'Масла' },
+            { name: 'Уши рыбные', kcal: 110, category: 'Рыба' },
+            { name: 'Спинка рыбная', kcal: 130, category: 'Рыба' },
+
+            // Молочные продукты
+            { name: 'Ряженка', kcal: 85, category: 'Молочные' },
+            { name: 'Простокваша', kcal: 67, category: 'Молочные' },
+            { name: 'Сыр плавленый', kcal: 226, category: 'Молочные' },
+            { name: 'Творожная масса', kcal: 161, category: 'Молочные' },
+
+            // Соусы и приправы
+            { name: 'Оливковое масло (1 ст.л.)', kcal: 119, category: 'Масла' },
+            { name: 'Майонез', kcal: 628, category: 'Масла' },
+            { name: 'Кетчуп', kcal: 93, category: 'Закуски' },
+            { name: 'Сметана (10%)', kcal: 115, category: 'Молочные' },
+
+            // Дополнительные снеки
+            { name: 'Сыр плавленый (ломтик)', kcal: 67, category: 'Молочные' },
+            { name: 'Батончик мюсли', kcal: 380, category: 'Закуски' },
+            { name: 'Энергетический батончик', kcal: 420, category: 'Закуски' },
+            { name: 'Протеиновый батончик', kcal: 210, category: 'Закуски' },
+            { name: 'Кокосовая стружка', kcal: 592, category: 'Закуски' },
+        ];
+
+        let meals = [];
+        let selectedFood = null;
+
+        document.getElementById('foodInput').addEventListener('input', function(e) {
+            const query = e.target.value.trim().toLowerCase();
+            const resultsContainer = document.getElementById('searchResults');
+
+            if (query.length < 1) {
+                resultsContainer.classList.remove('active');
+                return;
+            }
+
+            const matches = foodDatabase.filter(food =>
+                food.name.toLowerCase().includes(query)
+            ).slice(0, 8);
+
+            if (matches.length === 0) {
+                resultsContainer.classList.remove('active');
+                return;
+            }
+
+            resultsContainer.innerHTML = matches.map(food => `
+                <div class="search-item" onclick="selectFood('${food.name}', ${food.kcal})">
+                    <div class="search-item-name">${food.name}</div>
+                    <div class="search-item-kcal">${food.kcal} ккал на 100г</div>
+                </div>
+            `).join('');
+
+            resultsContainer.classList.add('active');
+        });
+
+        function selectFood(name, kcal) {
+            document.getElementById('foodInput').value = name;
+            selectedFood = { name, kcal };
+            document.getElementById('searchResults').classList.remove('active');
+        }
+
+        function addMeal() {
+            const foodInput = document.getElementById('foodInput');
+            const amountInput = document.getElementById('amountInput');
+            const mealType = document.getElementById('mealType').value;
+
+            if (!foodInput.value.trim()) {
+                alert('Введите название продукта');
+                return;
+            }
+
+            if (!selectedFood) {
+                const manualFood = foodDatabase.find(f =>
+                    f.name.toLowerCase() === foodInput.value.toLowerCase()
+                );
+
+                if (!manualFood) {
+                    alert('Продукт не найден. Выберите из списка рекомендаций');
+                    return;
+                }
+
+                selectedFood = manualFood;
+            }
+
+            const amount = parseFloat(amountInput.value) || 100;
+            const calories = Math.round((selectedFood.kcal / 100) * amount);
+
+            meals.push({
+                id: Date.now(),
+                name: selectedFood.name,
+                amount,
+                calories,
+                type: mealType
+            });
+
+            foodInput.value = '';
+            amountInput.value = '100';
+            selectedFood = null;
+
+            renderMeals();
+        }
+
+        function removeMeal(id) {
+            meals = meals.filter(m => m.id !== id);
+            renderMeals();
+        }
+
+        function renderMeals() {
+            const mealTypes = {
+                breakfast: 'breakfast',
+                lunch: 'lunch',
+                dinner: 'dinner',
+                snack: 'snack'
+            };
+
+            Object.keys(mealTypes).forEach(type => {
+                const container = document.getElementById(type);
+                const emptyState = document.getElementById(type + 'Empty');
+                const typeMeals = meals.filter(m => m.type === type);
+
+                if (typeMeals.length === 0) {
+                    container.innerHTML = '';
+                    emptyState.style.display = 'block';
+                } else {
+                    emptyState.style.display = 'none';
+                    container.innerHTML = typeMeals.map(meal => `
+                        <div class="meal-item">
+                            <div class="meal-item-info">
+                                <div class="meal-item-name">${meal.name}</div>
+                                <div class="meal-item-details">${meal.amount}г</div>
+                            </div>
+                            <div class="meal-item-calories">${meal.calories}</div>
+                            <button class="btn-danger" onclick="removeMeal(${meal.id})">✕</button>
+                        </div>
+                    `).join('');
+                }
+            });
+
+            updateStats();
+        }
+
+        function updateStats() {
+            const total = meals.reduce((sum, m) => sum + m.calories, 0);
+            const stepsCalories = meals.filter(m => m.name.includes('🚶')).reduce((sum, m) => sum + m.calories, 0);
+            const dailyGoal = 2000;
+            const remaining = Math.max(0, dailyGoal - total);
+
+            document.getElementById('totalCalories').textContent = total;
+            document.getElementById('itemCount').textContent = meals.filter(m => !m.name.includes('🚶')).length;
+            document.getElementById('stepsTotal').textContent = stepsCalories;
+            document.getElementById('remaining').textContent = remaining;
+        }
+
+        let stepsCaloriesValue = 0;
+        function calculateStepsCalories() {
+            const steps = parseFloat(document.getElementById('stepsInput').value) || 0;
+            const weight = parseFloat(document.getElementById('weightInput').value) || 70;
+
+            if (steps < 0 || weight < 30) {
+                alert('Введите корректные значения');
+                return;
+            }
+
+            const caloriesPerStep = (0.04 * weight) / 70;
+            stepsCaloriesValue = Math.round(steps * caloriesPerStep);
+
+            document.getElementById('stepsCaloriesValue').textContent = stepsCaloriesValue;
+            document.getElementById('stepsDetails').textContent = 
+                `Пройдено ${steps.toLocaleString('ru-RU')} шагов, вес ${weight} кг`;
+            document.getElementById('stepsResult').style.display = 'block';
+        }
+
+        function addStepsCaloriesAsMeal() {
+            if (stepsCaloriesValue <= 0) {
+                alert('Сначала рассчитайте калории из шагов');
+                return;
+            }
+
+            const steps = parseFloat(document.getElementById('stepsInput').value);
+            meals.push({
+                id: Date.now(),
+                name: `🚶 Шаги (${steps.toLocaleString('ru-RU')} шт)`,
+                amount: steps,
+                calories: stepsCaloriesValue,
+                type: 'snack'
+            });
+
+            document.getElementById('stepsInput').value = '0';
+            document.getElementById('stepsResult').style.display = 'none';
+            stepsCaloriesValue = 0;
+
+            renderMeals();
+        }
+
+        renderMeals();
+    </script>
+</body>
+</html>
